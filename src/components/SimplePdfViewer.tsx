@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'
 
 interface SimplePdfViewerProps {
   url: string;
@@ -8,102 +8,77 @@ interface SimplePdfViewerProps {
 }
 
 export default function SimplePdfViewer({ url, title = 'PDF Документ' }: SimplePdfViewerProps) {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // Используем Google Docs Viewer для отображения PDF
-  const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [iframeUrl, setIframeUrl] = useState('')
 
-  const handleIframeLoad = () => {
-    setLoading(false);
-    setError(null);
-  };
+  useEffect(() => {
+    // Проверяем, доступен ли файл напрямую
+    const checkFileAccess = async () => {
+      try {
+        const response = await fetch(url, { method: 'HEAD' })
+        
+        if (response.ok) {
+          // Файл доступен напрямую
+          setIframeUrl(`${url}#view=FitH`)
+        } else {
+          // Используем Google Docs Viewer как fallback
+          const googleUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`
+          setIframeUrl(googleUrl)
+        }
+      } catch (err) {
+        // При ошибке используем Google Docs Viewer
+        const googleUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`
+        setIframeUrl(googleUrl)
+      }
+    }
 
-  const handleIframeError = () => {
-    setError('Не удалось загрузить PDF документ через Google Viewer. Попробуйте скачать файл.');
-    setLoading(false);
-  };
+    checkFileAccess()
+  }, [url])
 
   return (
     <div className="simple-pdf-viewer">
       {loading && (
         <div className="viewer-loading">
           <div className="loading-spinner"></div>
-          <p>Загрузка PDF через Google Docs Viewer...</p>
-          <p className="loading-hint">Это может занять несколько секунд</p>
+          <p>Загрузка PDF документа...</p>
         </div>
       )}
       
       {error && (
         <div className="viewer-error">
-          <div className="error-icon">⚠️</div>
-          <h4>Ошибка загрузки</h4>
           <p>{error}</p>
-          <div className="error-actions">
-            <a 
-              href={url} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="btn btn-primary"
-            >
-              ↗️ Открыть в новой вкладке
-            </a>
-          </div>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+            Открыть в новой вкладке
+          </a>
         </div>
       )}
       
       <iframe
-        src={googleViewerUrl}
-        title={`Google Docs Viewer: ${title}`}
+        src={iframeUrl}
+        title={title}
         className="pdf-iframe"
-        onLoad={handleIframeLoad}
-        onError={handleIframeError}
+        onLoad={() => setLoading(false)}
+        onError={() => {
+          setError('Предварительный просмотр недоступен. Файл может быть защищён или недоступен.')
+          setLoading(false)
+        }}
         style={{
           width: '100%',
-          height: 'calc(100vh - 200px)',
-          minHeight: '600px',
+          height: '800px',
           border: 'none',
-          display: (loading || error) ? 'none' : 'block',
-          borderRadius: '8px',
-          boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
+          display: loading || error ? 'none' : 'block'
         }}
-        allow="fullscreen"
       />
       
-      <div className="viewer-actions" style={{ display: loading ? 'none' : 'flex' }}>
-        <a 
-          href={googleViewerUrl} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="btn btn-outline"
-        >
-          ↗️ Открыть в Google Viewer
+      <div className="viewer-actions" style={{ display: loading || error ? 'none' : 'flex' }}>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
+          Открыть в новой вкладке
         </a>
-        <a 
-          href={url} 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="btn btn-outline"
-        >
-          ↗️ Открыть напрямую
+        <a href={url} download className="btn btn-primary">
+          Скачать PDF
         </a>
-        <a 
-          href={url} 
-          download
-          className="btn btn-primary"
-        >
-          ⬇️ Скачать PDF
-        </a>
-      </div>
-      
-      <div className="viewer-help">
-        <p><strong>Примечание:</strong> PDF отображается через Google Docs Viewer для совместимости.</p>
-        <ul>
-          <li>Google Viewer поддерживает поиск, масштабирование и печать</li>
-          <li>Оригинальный файл всегда доступен для скачивания</li>
-          <li>Для приватных файлов используйте прямое скачивание</li>
-        </ul>
       </div>
     </div>
-  );
+  )
 }
