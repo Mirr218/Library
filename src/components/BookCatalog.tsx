@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import BookCard from './BookCard'
 import { LocalBook } from '../app/hooks/useLocalLibrary'
 
@@ -11,34 +11,24 @@ interface BookCatalogProps {
 export default function BookCatalog({ books }: BookCatalogProps) {
   const [search, setSearch] = useState('')
 
-  const filteredBooks = books.filter(book => {
-    if (!search) return true
+  // Используем useMemo для мгновенной фильтрации без лагов
+  const filteredBooks = useMemo(() => {
+    if (!search) return books
     
     const searchLower = search.toLowerCase()
-    return (
-      book.title.toLowerCase().includes(searchLower) ||
-      book.author.toLowerCase().includes(searchLower) ||
-      (book.description?.toLowerCase().includes(searchLower)) ||
-      (book.tags?.some(tag => tag.toLowerCase().includes(searchLower)))
-    )
-  })
-
-  // Если книги обновились, этот компонент перерисуется
-  
-  if (filteredBooks.length === 0) {
-    return (
-      <div className="no-results">
-        {search ? (
-          <p>По запросу "{search}" ничего не найдено</p>
-        ) : (
-          <p>В библиотеке нет книг</p>
-        )}
-      </div>
-    )
-  }
+    return books.filter(book => {
+      return (
+        book.title.toLowerCase().includes(searchLower) ||
+        book.author.toLowerCase().includes(searchLower) ||
+        (book.description?.toLowerCase().includes(searchLower)) ||
+        (book.tags?.some(tag => tag.toLowerCase().includes(searchLower)))
+      )
+    })
+  }, [books, search])
 
   return (
-    <div>
+    <div className="book-catalog">
+      {/* Поисковая строка - всегда отображается */}
       <div className="search-section">
         <input
           type="text"
@@ -49,14 +39,35 @@ export default function BookCatalog({ books }: BookCatalogProps) {
         />
         <div className="search-info">
           Найдено: {filteredBooks.length} из {books.length} книг
+          {search && filteredBooks.length === 0 && (
+            <span className="no-results-indicator"> • Нет результатов</span>
+          )}
         </div>
       </div>
 
-      <div className="book-grid">
-        {filteredBooks.map((book) => (
-          <BookCard key={book.id} book={book} />
-        ))}
-      </div>
+      {/* Сообщение о пустом результате */}
+      {search && filteredBooks.length === 0 && (
+        <div className="no-results-message">
+          <div className="no-results-icon">🔍</div>
+          <h3>По запросу "{search}" ничего не найдено</h3>
+          <p>Попробуйте изменить запрос или проверьте орфографию</p>
+          <button 
+            onClick={() => setSearch('')}
+            className="btn btn-outline"
+          >
+            Очистить поиск
+          </button>
+        </div>
+      )}
+
+      {/* Сетка книг - показываем только если есть результаты ИЛИ если нет поиска */}
+      {(!search || filteredBooks.length > 0) && (
+        <div className="book-grid">
+          {filteredBooks.map((book) => (
+            <BookCard key={book.id} book={book} />
+          ))}
+        </div>
+      )}
     </div>
   )
 }

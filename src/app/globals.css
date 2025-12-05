@@ -1202,3 +1202,70 @@ body {
 [data-theme="eye-care"] .suggested-panel {
   background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
 }
+
+/* Стили для каталога книг */
+.book-catalog {
+  width: 100%;
+}
+
+.no-results-indicator {
+  color: #e74c3c;
+  font-weight: 500;
+}
+
+/* Сообщение о пустом результате */
+.no-results-message {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin: 20px 0;
+  border: 1px solid #ffeaa7;
+  background-color: #fffef9;
+}
+
+.no-results-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #fdcb6e;
+}
+
+.no-results-message h3 {
+  color: #2d3436;
+  margin-bottom: 10px;
+}
+
+.no-results-message p {
+  color: #636e72;
+  margin-bottom: 20px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.no-results-message .btn {
+  margin-top: 10px;
+}
+
+/* Для темной темы */
+[data-theme="dark"] .no-results-message {
+  background: #2d2d2d;
+  border-color: #444;
+  background-color: #1a1a1a;
+}
+
+[data-theme="dark"] .no-results-message h3 {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .no-results-message p {
+  color: #b2bec3;
+}
+
+/* Для режима защиты глаз */
+[data-theme="eye-care"] .no-results-message {
+  background: #f0f7ff;
+  border-color: #c5d5ff;
+  background-color: #f8fbff;
+}
