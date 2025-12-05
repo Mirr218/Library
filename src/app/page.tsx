@@ -1,66 +1,80 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client'
+
+import { useEffect } from 'react'
+import Link from 'next/link'
+import BookCatalog from '@/components/BookCatalog'
+import LibraryTools from '@/components/LibraryTools'
+import SuggestedBooksPanel from '@/components/SuggestedBooksPanel'
+import { useLocalLibrary } from './hooks/useLocalLibrary'
 
 export default function Home() {
+  const { displayedBooks, isLoading, clearLibrary } = useLocalLibrary()
+
+  // Автоматически перезагружаем библиотеку при изменении
+  useEffect(() => {
+    const handleLibraryUpdate = () => {
+      window.location.reload()
+    }
+
+    window.addEventListener('libraryUpdated', handleLibraryUpdate)
+    return () => window.removeEventListener('libraryUpdated', handleLibraryUpdate)
+  }, [])
+
+  if (isLoading) {
+    return (
+      <main className="container">
+        <div className="loading">Загрузка вашей библиотеки...</div>
+      </main>
+    )
+  }
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="container">
+      <div className="library-header">
+        <h1 className="main-title">📚 Моя личная библиотека</h1>
+        <p className="library-info">
+          Книг в библиотеке: <strong>{displayedBooks.length}</strong>
+        </p>
+      </div>
+
+      {/* Панель рекомендованных книг */}
+      <SuggestedBooksPanel />
+
+      <div className="actions">
+        <Link href="/add-book" className="btn btn-primary">
+          ➕ Добавить свою книгу
+        </Link>
+        <LibraryTools />
+      </div>
+
+      {displayedBooks.length === 0 ? (
+        <div className="empty-library">
+          <div className="empty-icon">📚</div>
+          <h2>Библиотека пуста</h2>
+          <p>Добавьте книги из рекомендуемых или загрузите свои</p>
+          <p className="empty-note">
+            ⚠️ Книги хранятся только в этом браузере. 
+            Используйте экспорт для резервной копии.
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+      ) : (
+        <>
+          <BookCatalog books={displayedBooks} />
+          <div className="library-footer">
+            <button 
+              onClick={() => {
+                if (confirm('Вы уверены? Все книги будут удалены из этого браузера.')) {
+                  clearLibrary()
+                  window.dispatchEvent(new Event('libraryUpdated'))
+                }
+              }}
+              className="btn btn-danger"
+            >
+              🗑️ Очистить библиотеку
+            </button>
+          </div>
+        </>
+      )}
+    </main>
+  )
 }
