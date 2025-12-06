@@ -17,7 +17,7 @@ export default function AddBookPage() {
     file: null as File | null
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
 
@@ -72,9 +72,9 @@ export default function AddBookPage() {
       router.push('/')
       router.refresh()
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error:', error)
-      alert(`Ошибка: ${error.message}`)
+      alert(`Ошибка: ${error}`)
     } finally {
       setLoading(false)
     }

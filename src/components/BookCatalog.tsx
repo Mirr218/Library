@@ -49,7 +49,7 @@ export default function BookCatalog({ books }: BookCatalogProps) {
       {search && filteredBooks.length === 0 && (
         <div className="no-results-message">
           <div className="no-results-icon">🔍</div>
-          <h3>По запросу "{search}" ничего не найдено</h3>
+          <h3>По запросу &quot;{search}&quot; ничего не найдено</h3>
           <p>Попробуйте изменить запрос или проверьте орфографию</p>
           <button 
             onClick={() => setSearch('')}

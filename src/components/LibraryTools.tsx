@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useLocalLibrary, LocalBook } from '../app/hooks/useLocalLibrary'
+import { useLocalLibrary } from '../app/hooks/useLocalLibrary'
+import { LocalBook } from '@/types/book'
 
 export default function LibraryTools() {
   const { books, reload } = useLocalLibrary()
@@ -57,7 +58,7 @@ export default function LibraryTools() {
       }
 
       // Проверяем структуру книг
-      const validBooks = data.books.filter((book: any) => 
+      const validBooks = data.books.filter((book: LocalBook) => 
         book.id && book.title && book.author && book.pdfUrl
       )
 
@@ -75,9 +76,9 @@ export default function LibraryTools() {
         reload()
         alert('Библиотека успешно импортирована!')
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Import error:', error)
-      alert(`Ошибка импорта: ${error.message}`)
+      alert(`Ошибка импорта: ${error}`)
     } finally {
       e.target.value = ''
     }

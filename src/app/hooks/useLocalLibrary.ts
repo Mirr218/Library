@@ -57,10 +57,6 @@ export function useLocalLibrary() {
     })
   }
 
-  useEffect(() => {
-    loadLibrary()
-  }, [])
-
   const loadLibrary = useCallback(() => {
     try {
       const stored = localStorage.getItem('personal_library')
@@ -79,6 +75,10 @@ export function useLocalLibrary() {
       setIsLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    loadLibrary()
+  }, [loadLibrary])
 
   const saveLibrary = useCallback((newBooks: LocalBook[]) => {
     try {

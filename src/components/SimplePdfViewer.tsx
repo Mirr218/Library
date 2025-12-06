@@ -26,7 +26,7 @@ export default function SimplePdfViewer({ url, title = 'PDF Документ' }:
           const googleUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`
           setIframeUrl(googleUrl)
         }
-      } catch (err) {
+      } catch (_err) {
         // При ошибке используем Google Docs Viewer
         const googleUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`
         setIframeUrl(googleUrl)

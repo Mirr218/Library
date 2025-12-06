@@ -1,14 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams  } from 'next/navigation'
 import Link from 'next/link'
 import { LocalBook } from '..//../hooks/useLocalLibrary'
 import SimplePdfViewer from '@/components/SimplePdfViewer'
 
 export default function BookPage() {
   const params = useParams()
-  const router = useRouter()
   const [book, setBook] = useState<LocalBook | null>(null)
   const [loading, setLoading] = useState(true)
 

@@ -1,9 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-//@ts-ignore
 import './globals.css'
 import ThemeToggle from '@/components/ThemeToggle'
 
@@ -19,16 +17,17 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'eye-care'>('light')
+  const [theme, setTheme] = useState<'light' | 'dark' | 'eye-care'>(() => {
+  if (typeof window !== 'undefined') {
+    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'eye-care';
+    return savedTheme || 'light';
+  }
+  return 'light';
+});
 
-  useEffect(() => {
-    // Загружаем тему из localStorage
-    const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | 'eye-care'
-    if (savedTheme) {
-      setTheme(savedTheme)
-      document.documentElement.setAttribute('data-theme', savedTheme)
-    }
-  }, [])
+useEffect(() => {
+  document.documentElement.setAttribute('data-theme', theme);
+}, [theme]);
 
   const handleThemeChange = (newTheme: 'light' | 'dark' | 'eye-care') => {
     setTheme(newTheme)

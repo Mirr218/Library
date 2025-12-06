@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { SuggestedBook } from '@/types/book'
+import { LocalBook, SuggestedBook } from '@/types/book'
 
 export function useSuggestedBooks() {
   const [suggestedBooks, setSuggestedBooks] = useState<SuggestedBook[]>([])
@@ -19,10 +19,16 @@ export function useSuggestedBooks() {
 
       if (error) throw error
       setSuggestedBooks(data || [])
-    } catch (error: any) {
-      console.error('Error loading suggested books:', error)
-      setError(error.message)
-    } finally {
+      } catch (error: unknown) {
+    console.error('Error loading suggested books:', error);
+    if (typeof error === 'object' && error !== null && 'message' in error) {
+      setError((error as { message: string }).message);
+    } else if (typeof error === 'string') {
+      setError(error);
+    } else {
+      setError('An unknown error occurred');
+    }
+  } finally {
       setLoading(false)
     }
   }
@@ -64,8 +70,8 @@ export function useSuggestedBooks() {
       const personalLibrary = JSON.parse(localStorage.getItem('personal_library') || '{"books": []}')
       const existingSuggestedIds = new Set(
         personalLibrary.books
-          .filter((b: any) => b.isSuggested)
-          .map((b: any) => b.suggestedId)
+          .filter((b: LocalBook) => b.isSuggested)
+          .map((b: LocalBook) => b.suggestedId)
       )
 
       let addedCount = 0
@@ -102,7 +108,7 @@ export function useSuggestedBooks() {
   const isBookAdded = (suggestedBookId: string): boolean => {
     try {
       const personalLibrary = JSON.parse(localStorage.getItem('personal_library') || '{"books": []}')
-      return personalLibrary.books.some((book: any) => book.suggestedId === suggestedBookId)
+      return personalLibrary.books.some((book: LocalBook) => book.suggestedId === suggestedBookId)
     } catch {
       return false
     }
